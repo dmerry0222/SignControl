@@ -25,58 +25,61 @@
         <button id="addStatus">Add Status</button>
     </div>
     <div id="statusList"></div>
-    <script>
-        const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
-        let bgColor = "black", mainTextColor = "white", subTextColor = "white";
+<script>
+    const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
+    let bgColor = "black", mainTextColor = "white", subTextColor = "white";
 
-        function createColorButtons(containerId, updateFunction, labelId) {
-            const container = document.getElementById(containerId);
-            colors.forEach(color => {
-                let btn = document.createElement("button");
-                btn.className = "color-button";
-                btn.style.backgroundColor = color;
-                btn.style.color = (color === "white") ? "black" : "white";
-                btn.textContent = color;
-                btn.onclick = () => {
-                    updateFunction(color);
-                    document.getElementById(labelId).textContent = color;
-                    if (color === "white") {
-                        document.getElementById(labelId).style.backgroundColor = "black";
-                        document.getElementById(labelId).style.color = "white";
-                    } else {
-                        document.getElementById(labelId).style.backgroundColor = "transparent";
-                        document.getElementById(labelId).style.color = "black";
-                    }
-                };
-                container.appendChild(btn);
-            });
-        }
+    function createColorButtons(containerId, updateFunction, labelId) {
+        const container = document.getElementById(containerId);
+        colors.forEach(color => {
+            let btn = document.createElement("button");
+            btn.className = "color-button";
+            btn.style.backgroundColor = color;
+            btn.style.color = (color === "white") ? "black" : "white";
+            btn.textContent = color;
+            btn.onclick = () => {
+                updateFunction(color);
+                const label = document.getElementById(labelId);
+                label.textContent = color;
 
-        createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
-        createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
-        createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
-
-        document.getElementById("addStatus").addEventListener("click", () => {
-            const mainText = document.getElementById("mainTextInput").value.trim();
-            const subText = document.getElementById("subTextInput").value.trim();
-            if (!mainText) return;
-
-            const statusCard = document.createElement("div");
-            statusCard.className = "status-card";
-            statusCard.style.backgroundColor = bgColor;
-            statusCard.innerHTML = `<strong style="color: ${mainTextColor}">${mainText}</strong><br><span style="color: ${subTextColor}">${subText}</span>`;
-
-            document.getElementById("statusList").appendChild(statusCard);
-            
-            document.getElementById("mainTextInput").value = "";
-            document.getElementById("subTextInput").value = "";
-            bgColor = "black";
-            mainTextColor = "white";
-            subTextColor = "white";
-            document.getElementById("bgColorLabel").textContent = "black";
-            document.getElementById("mainTextColorLabel").textContent = "white";
-            document.getElementById("subTextColorLabel").textContent = "white";
+                // Update the label text color to match the selected color, except for white
+                if (color === "white") {
+                    label.style.backgroundColor = "black";
+                    label.style.color = "white";
+                } else {
+                    label.style.backgroundColor = "transparent";
+                    label.style.color = color; // Set the label color to the selected color
+                }
+            };
+            container.appendChild(btn);
         });
-    </script>
+    }
+
+    createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
+    createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
+    createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
+
+    document.getElementById("addStatus").addEventListener("click", () => {
+        const mainText = document.getElementById("mainTextInput").value.trim();
+        const subText = document.getElementById("subTextInput").value.trim();
+        if (!mainText) return;
+
+        const statusCard = document.createElement("div");
+        statusCard.className = "status-card";
+        statusCard.style.backgroundColor = bgColor;
+        statusCard.innerHTML = `<strong style="color: ${mainTextColor}">${mainText}</strong><br><span style="color: ${subTextColor}">${subText}</span>`;
+
+        document.getElementById("statusList").appendChild(statusCard);
+        
+        document.getElementById("mainTextInput").value = "";
+        document.getElementById("subTextInput").value = "";
+        bgColor = "black";
+        mainTextColor = "white";
+        subTextColor = "white";
+        document.getElementById("bgColorLabel").textContent = "black";
+        document.getElementById("mainTextColorLabel").textContent = "white";
+        document.getElementById("subTextColorLabel").textContent = "white";
+    });
+</script>
 </body>
 </html>
