@@ -5,151 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Status Manager</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 400px;
-            margin: 20px auto;
-        }
-        .status-card {
-            position: relative;
-            padding: 10px;
-            margin: 10px 0;
-            color: white;
-            font-size: 20px;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-        }
-        .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 50%;
-            font-size: 14px;
-        }
-        .color-buttons button {
-            margin: 3px;
-            padding: 5px 10px;
-            border: none;
-            cursor: pointer;
-        }
-        .color-label {
-            padding: 3px 6px;
-            border-radius: 3px;
-        }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .color-button { padding: 10px; margin: 5px; border: none; cursor: pointer; }
+        .status-card { padding: 10px; margin: 10px 0; border-radius: 5px; color: white; }
+        .controls { margin-bottom: 20px; }
     </style>
 </head>
 <body>
-
     <h2>Status Manager</h2>
-
-    <div>
-        <strong>Background: <span id="bg-color-label" class="color-label" style="background:black; color:white;">Black</span></strong>
-        <div class="color-buttons">
-            <button onclick="setColor('background', 'black')">Black</button>
-            <button onclick="setColor('background', 'white')">White</button>
-            <button onclick="setColor('background', 'red')">Red</button>
-            <button onclick="setColor('background', 'gray')">Gray</button>
-            <button onclick="setColor('background', 'blue')">Blue</button>
-            <button onclick="setColor('background', 'green')">Green</button>
-            <button onclick="setColor('background', 'purple')">Purple</button>
-        </div>
+    <div class="controls">
+        <p>Background: <span id="bgColorLabel">black</span></p>
+        <div id="bgColors"></div>
+        <p>Main Text: <span id="mainTextColorLabel">white</span></p>
+        <input type="text" id="mainTextInput" placeholder="Enter main status text">
+        <div id="mainTextColors"></div>
+        <p>Subtext: <span id="subTextColorLabel">white</span></p>
+        <input type="text" id="subTextInput" placeholder="Enter subtext">
+        <div id="subTextColors"></div>
+        <button id="addStatus">Add Status</button>
     </div>
-
-    <div>
-        <strong>Main Text: <span id="main-text-color-label" class="color-label" style="background:black; color:white;">White</span></strong>
-        <input type="text" id="main-text" placeholder="Enter main status">
-        <div class="color-buttons">
-            <button onclick="setColor('main', 'black')">Black</button>
-            <button onclick="setColor('main', 'white')">White</button>
-            <button onclick="setColor('main', 'red')">Red</button>
-            <button onclick="setColor('main', 'gray')">Gray</button>
-            <button onclick="setColor('main', 'blue')">Blue</button>
-            <button onclick="setColor('main', 'green')">Green</button>
-            <button onclick="setColor('main', 'purple')">Purple</button>
-        </div>
-    </div>
-
-    <div>
-        <strong>Subtext: <span id="subtext-color-label" class="color-label" style="background:black; color:white;">White</span></strong>
-        <input type="text" id="subtext" placeholder="Enter additional info">
-        <div class="color-buttons">
-            <button onclick="setColor('subtext', 'black')">Black</button>
-            <button onclick="setColor('subtext', 'white')">White</button>
-            <button onclick="setColor('subtext', 'red')">Red</button>
-            <button onclick="setColor('subtext', 'gray')">Gray</button>
-            <button onclick="setColor('subtext', 'blue')">Blue</button>
-            <button onclick="setColor('subtext', 'green')">Green</button>
-            <button onclick="setColor('subtext', 'purple')">Purple</button>
-        </div>
-    </div>
-
-    <button onclick="addStatus()" style="margin-top: 10px; display: block; width: 100%;">Add Status</button>
-
-    <div id="status-list"></div>
-
+    <div id="statusList"></div>
     <script>
-        let selectedColors = {
-            background: 'black',
-            main: 'white',
-            subtext: 'white'
-        };
+        const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
+        let bgColor = "black", mainTextColor = "white", subTextColor = "white";
 
-        function setColor(type, color) {
-            selectedColors[type] = color;
-            let label = document.getElementById(`${type}-color-label`);
-            label.textContent = color.charAt(0).toUpperCase() + color.slice(1);
-            label.style.color = (color === 'white') ? 'black' : 'white';
-            label.style.background = color;
+        function createColorButtons(containerId, updateFunction, labelId) {
+            const container = document.getElementById(containerId);
+            colors.forEach(color => {
+                let btn = document.createElement("button");
+                btn.className = "color-button";
+                btn.style.backgroundColor = color;
+                btn.style.color = (color === "white") ? "black" : "white";
+                btn.textContent = color;
+                btn.onclick = () => {
+                    updateFunction(color);
+                    document.getElementById(labelId).textContent = color;
+                    if (color === "white") {
+                        document.getElementById(labelId).style.backgroundColor = "black";
+                        document.getElementById(labelId).style.color = "white";
+                    } else {
+                        document.getElementById(labelId).style.backgroundColor = "transparent";
+                        document.getElementById(labelId).style.color = "black";
+                    }
+                };
+                container.appendChild(btn);
+            });
         }
 
-        function addStatus() {
-            let mainText = document.getElementById('main-text').value;
-            let subText = document.getElementById('subtext').value;
+        createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
+        createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
+        createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
+
+        document.getElementById("addStatus").addEventListener("click", () => {
+            const mainText = document.getElementById("mainTextInput").value.trim();
+            const subText = document.getElementById("subTextInput").value.trim();
             if (!mainText) return;
 
-            let statusCard = document.createElement('div');
-            statusCard.className = 'status-card';
-            statusCard.style.background = selectedColors.background;
+            const statusCard = document.createElement("div");
+            statusCard.className = "status-card";
+            statusCard.style.backgroundColor = bgColor;
+            statusCard.innerHTML = `<strong style="color: ${mainTextColor}">${mainText}</strong><br><span style="color: ${subTextColor}">${subText}</span>`;
 
-            let removeBtn = document.createElement('button');
-            removeBtn.textContent = 'X';
-            removeBtn.className = 'remove-btn';
-            removeBtn.onclick = function() {
-                statusCard.remove();
-            };
-
-            let mainTextElement = document.createElement('div');
-            mainTextElement.textContent = mainText;
-            mainTextElement.style.color = selectedColors.main;
-            mainTextElement.style.fontWeight = 'bold';
-
-            let subTextElement = document.createElement('div');
-            subTextElement.textContent = subText;
-            subTextElement.style.color = selectedColors.subtext;
-            subTextElement.style.fontSize = '14px';
-
-            statusCard.appendChild(removeBtn);
-            statusCard.appendChild(mainTextElement);
-            if (subText) {
-                statusCard.appendChild(subTextElement);
-            }
-
-            document.getElementById('status-list').appendChild(statusCard);
-
-            // Reset inputs and colors
-            document.getElementById('main-text').value = '';
-            document.getElementById('subtext').value = '';
-            setColor('background', 'black');
-            setColor('main', 'white');
-            setColor('subtext', 'white');
-        }
+            document.getElementById("statusList").appendChild(statusCard);
+            
+            document.getElementById("mainTextInput").value = "";
+            document.getElementById("subTextInput").value = "";
+            bgColor = "black";
+            mainTextColor = "white";
+            subTextColor = "white";
+            document.getElementById("bgColorLabel").textContent = "black";
+            document.getElementById("mainTextColorLabel").textContent = "white";
+            document.getElementById("subTextColorLabel").textContent = "white";
+        });
     </script>
-
 </body>
 </html>
