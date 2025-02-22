@@ -1,63 +1,69 @@
-// Updated UI Code with Dynamic Color Labels Instead of Indicators
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Status Display UI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Control</title>
     <style>
-        .color-button {
-            padding: 5px 10px;
-            margin: 2px;
-            border: none;
-            cursor: pointer;
-        }
-        .color-label {
-            display: inline-block;
-            padding: 2px 5px;
-            font-weight: bold;
-        }
-        .white-text { background-color: black; color: white; }
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .color-button { margin: 5px; padding: 10px; border: none; cursor: pointer; }
+        .label { font-weight: bold; padding: 5px; display: inline-block; }
     </style>
-</head>
-<body>
-    <h3>Status Display</h3>
-    
-    <label id="bg-label" class="color-label">Background Color:</label><br>
-    <button class="color-button" style="background-color: black; color: white;" onclick="setColor('bg', 'black')">Black</button>
-    <button class="color-button" style="background-color: white; color: black;" onclick="setColor('bg', 'white')">White</button>
-    <button class="color-button" style="background-color: red;" onclick="setColor('bg', 'red')">Red</button>
-    <button class="color-button" style="background-color: gray;" onclick="setColor('bg', 'gray')">Gray</button>
-    <button class="color-button" style="background-color: blue;" onclick="setColor('bg', 'blue')">Blue</button>
-    <button class="color-button" style="background-color: green;" onclick="setColor('bg', 'green')">Green</button>
-    <button class="color-button" style="background-color: purple;" onclick="setColor('bg', 'purple')">Purple</button>
-    
-    <br><br>
-    <label id="main-label" class="color-label">Main Text Color:</label><br>
-    <button class="color-button" style="background-color: black; color: white;" onclick="setColor('main', 'black')">Black</button>
-    <button class="color-button" style="background-color: white; color: black;" onclick="setColor('main', 'white')">White</button>
-    <button class="color-button" style="background-color: red;" onclick="setColor('main', 'red')">Red</button>
-    <button class="color-button" style="background-color: gray;" onclick="setColor('main', 'gray')">Gray</button>
-    <button class="color-button" style="background-color: blue;" onclick="setColor('main', 'blue')">Blue</button>
-    <button class="color-button" style="background-color: green;" onclick="setColor('main', 'green')">Green</button>
-    <button class="color-button" style="background-color: purple;" onclick="setColor('main', 'purple')">Purple</button>
-    
-    <br><br>
-    <label id="sub-label" class="color-label">Subtext Color:</label><br>
-    <button class="color-button" style="background-color: black; color: white;" onclick="setColor('sub', 'black')">Black</button>
-    <button class="color-button" style="background-color: white; color: black;" onclick="setColor('sub', 'white')">White</button>
-    <button class="color-button" style="background-color: red;" onclick="setColor('sub', 'red')">Red</button>
-    <button class="color-button" style="background-color: gray;" onclick="setColor('sub', 'gray')">Gray</button>
-    <button class="color-button" style="background-color: blue;" onclick="setColor('sub', 'blue')">Blue</button>
-    <button class="color-button" style="background-color: green;" onclick="setColor('sub', 'green')">Green</button>
-    <button class="color-button" style="background-color: purple;" onclick="setColor('sub', 'purple')">Purple</button>
-    
     <script>
-        function setColor(type, color) {
-            let label = document.getElementById(type + "-label");
-            label.textContent = (type === 'bg' ? "Background" : type === 'main' ? "Main Text" : "Subtext") + " Color: " + color;
+        function updateLabel(section, color) {
+            const label = document.getElementById(section + "Label");
+            label.textContent = section.replace("Color", "") + ": " + color;
             label.style.color = color;
-            label.classList.toggle("white-text", color === "white");
+            label.style.backgroundColor = color === "white" ? "black" : "transparent";
+        }
+        
+        function resetForm() {
+            document.getElementById("mainText").value = "";
+            document.getElementById("subText").value = "";
+            updateLabel("Main Text", "white");
+            updateLabel("Subtext", "white");
+            updateLabel("Background", "black");
         }
     </script>
+</head>
+<body>
+    <h2>Status Control Panel</h2>
+    
+    <div>
+        <span class="label" id="BackgroundLabel">Background: black</span><br>
+        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Background', 'black')">Black</button>
+        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Background', 'white')">White</button>
+        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Background', 'red')">Red</button>
+        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Background', 'gray')">Gray</button>
+        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Background', 'blue')">Blue</button>
+        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Background', 'green')">Green</button>
+        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Background', 'purple')">Purple</button>
+    </div>
+    
+    <div>
+        <span class="label" id="Main TextLabel">Main Text: white</span><br>
+        <input type="text" id="mainText" placeholder="Enter main text..."><br>
+        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Main Text', 'black')">Black</button>
+        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Main Text', 'white')">White</button>
+        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Main Text', 'red')">Red</button>
+        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Main Text', 'gray')">Gray</button>
+        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Main Text', 'blue')">Blue</button>
+        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Main Text', 'green')">Green</button>
+        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Main Text', 'purple')">Purple</button>
+    </div>
+    
+    <div>
+        <span class="label" id="SubtextLabel">Subtext: white</span><br>
+        <input type="text" id="subText" placeholder="Enter subtext..."><br>
+        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Subtext', 'black')">Black</button>
+        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Subtext', 'white')">White</button>
+        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Subtext', 'red')">Red</button>
+        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Subtext', 'gray')">Gray</button>
+        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Subtext', 'blue')">Blue</button>
+        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Subtext', 'green')">Green</button>
+        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Subtext', 'purple')">Purple</button>
+    </div>
+    
+    <button onclick="resetForm()" style="margin-top: 20px; padding: 10px; font-size: 16px;">Add Status</button>
 </body>
 </html>
