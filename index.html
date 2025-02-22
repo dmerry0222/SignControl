@@ -3,116 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Control</title>
+    <title>Status Control Panel</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .status {
-            padding: 15px;
-            margin: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .status .delete {
-            cursor: pointer;
-            color: red;
-        }
-        .form {
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 5px;
-            margin: 10px;
-        }
-        .input-field {
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-        }
-        .color-picker {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        .color-button {
-            padding: 10px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; }
+        .status-card { padding: 10px; margin: 5px 0; border-radius: 5px; color: white; }
+        .color-options button { border: none; padding: 5px 10px; margin: 3px; cursor: pointer; font-weight: bold; }
+        .color-indicator { width: 20px; height: 20px; display: inline-block; border: 1px solid #000; margin-left: 5px; }
     </style>
 </head>
 <body>
-
-<h1>Manage Statuses</h1>
-
-<div id="statusList">
-    <!-- List of active statuses will appear here -->
-</div>
-
-<div class="form">
-    <h2>Add New Status</h2>
-    <input type="text" id="statusText" class="input-field" placeholder="Enter status text" />
-    <input type="text" id="statusTime" class="input-field" placeholder="Add time info (optional)" />
-    <div class="color-picker">
-        <button class="color-button" style="background-color: green;" onclick="setColor('green')">Green</button>
-        <button class="color-button" style="background-color: red;" onclick="setColor('red')">Red</button>
-        <button class="color-button" style="background-color: blue;" onclick="setColor('blue')">Blue</button>
-    </div>
+    <h2>Status Control Panel</h2>
+    <div id="statusList"></div>
+    
+    <h3>Add Status</h3>
+    <input type="text" id="mainText" placeholder="Main Status Text">
+    <input type="text" id="subText" placeholder="Supplemental Info (e.g., time)">
+    
+    <h4>Background Color:</h4>
+    <div class="color-options" id="bgColors"></div>
+    <span class="color-indicator" id="bgIndicator" style="background: black;"></span>
+    
+    <h4>Main Text Color:</h4>
+    <div class="color-options" id="mainColors"></div>
+    <span class="color-indicator" id="mainIndicator" style="background: white;"></span>
+    
+    <h4>Subtext Color:</h4>
+    <div class="color-options" id="subColors"></div>
+    <span class="color-indicator" id="subIndicator" style="background: white;"></span>
+    
     <button onclick="addStatus()">Add Status</button>
-</div>
-
-<script>
-    let statuses = [];
-    let selectedColor = 'green';
-
-    function setColor(color) {
-        selectedColor = color;
-    }
-
-    function addStatus() {
-        const statusText = document.getElementById('statusText').value;
-        const statusTime = document.getElementById('statusTime').value;
-
-        if (statusText.trim() !== '') {
-            const newStatus = {
-                text: statusText,
-                time: statusTime,
-                color: selectedColor
-            };
-            statuses.push(newStatus);
-            renderStatuses();
+    
+    <script>
+        const colors = ['black', 'white', 'red', 'gray', 'blue', 'green', 'purple'];
+        let selectedColors = { background: 'black', mainText: 'white', subText: 'white' };
+        
+        function createColorButtons(containerId, colorType, indicatorId) {
+            const container = document.getElementById(containerId);
+            colors.forEach(color => {
+                let btn = document.createElement('button');
+                btn.style.background = color;
+                btn.style.color = (color === 'black') ? 'white' : 'black';
+                btn.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+                btn.onclick = () => {
+                    selectedColors[colorType] = color;
+                    document.getElementById(indicatorId).style.background = color;
+                };
+                container.appendChild(btn);
+            });
         }
-    }
-
-    function deleteStatus(index) {
-        statuses.splice(index, 1);
-        renderStatuses();
-    }
-
-    function renderStatuses() {
-        const statusListDiv = document.getElementById('statusList');
-        statusListDiv.innerHTML = '';
-
-        statuses.forEach((status, index) => {
-            const statusDiv = document.createElement('div');
-            statusDiv.classList.add('status');
-            statusDiv.style.backgroundColor = status.color;
-
-            const statusText = document.createElement('div');
-            statusText.innerText = status.text + (status.time ? ` (${status.time})` : '');
-
-            const deleteButton = document.createElement('span');
-            deleteButton.innerText = 'X';
-            deleteButton.classList.add('delete');
-            deleteButton.onclick = () => deleteStatus(index);
-
-            statusDiv.appendChild(statusText);
-            statusDiv.appendChild(deleteButton);
-            statusListDiv.appendChild(statusDiv);
-        });
-    }
-</script>
-
+        
+        function addStatus() {
+            const mainText = document.getElementById("mainText").value;
+            const subText = document.getElementById("subText").value;
+            if (!mainText) return;
+            
+            let statusDiv = document.createElement("div");
+            statusDiv.classList.add("status-card");
+            statusDiv.style.background = selectedColors.background;
+            statusDiv.innerHTML = `<strong style="color: ${selectedColors.mainText}">${mainText}</strong><br>
+                                   <span style="color: ${selectedColors.subText}">${subText}</span>
+                                   <button onclick="removeStatus(this)" style="float:right;">❌</button>`;
+            
+            document.getElementById("statusList").appendChild(statusDiv);
+            
+            // Reset form
+            document.getElementById("mainText").value = "";
+            document.getElementById("subText").value = "";
+            selectedColors = { background: 'black', mainText: 'white', subText: 'white' };
+            document.getElementById("bgIndicator").style.background = 'black';
+            document.getElementById("mainIndicator").style.background = 'white';
+            document.getElementById("subIndicator").style.background = 'white';
+        }
+        
+        function removeStatus(button) {
+            button.parentElement.remove();
+        }
+        
+        createColorButtons("bgColors", "background", "bgIndicator");
+        createColorButtons("mainColors", "mainText", "mainIndicator");
+        createColorButtons("subColors", "subText", "subIndicator");
+    </script>
 </body>
 </html>
