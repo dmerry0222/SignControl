@@ -3,67 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Control</title>
+    <title>Status Manager</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .color-button { margin: 5px; padding: 10px; border: none; cursor: pointer; }
-        .label { font-weight: bold; padding: 5px; display: inline-block; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .color-button { padding: 10px; margin: 5px; border: none; cursor: pointer; }
+        .status-card { padding: 10px; margin: 10px 0; border-radius: 5px; color: white; }
+        .controls { margin-bottom: 20px; }
     </style>
-    <script>
-        function updateLabel(section, color) {
-            const label = document.getElementById(section + "Label");
-            label.textContent = section.replace("Color", "") + ": " + color;
-            label.style.color = color;
-            label.style.backgroundColor = color === "white" ? "black" : "transparent";
-        }
-        
-        function resetForm() {
-            document.getElementById("mainText").value = "";
-            document.getElementById("subText").value = "";
-            updateLabel("Main Text", "white");
-            updateLabel("Subtext", "white");
-            updateLabel("Background", "black");
-        }
-    </script>
 </head>
 <body>
-    <h2>Status Control Panel</h2>
-    
-    <div>
-        <span class="label" id="BackgroundLabel">Background: black</span><br>
-        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Background', 'black')">Black</button>
-        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Background', 'white')">White</button>
-        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Background', 'red')">Red</button>
-        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Background', 'gray')">Gray</button>
-        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Background', 'blue')">Blue</button>
-        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Background', 'green')">Green</button>
-        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Background', 'purple')">Purple</button>
+    <h2>Status Manager</h2>
+    <div class="controls">
+        <p>Background: <span id="bgColorLabel">black</span></p>
+        <div id="bgColors"></div>
+        <p>Main Text: <span id="mainTextColorLabel">white</span></p>
+        <input type="text" id="mainTextInput" placeholder="Enter main status text">
+        <div id="mainTextColors"></div>
+        <p>Subtext: <span id="subTextColorLabel">white</span></p>
+        <input type="text" id="subTextInput" placeholder="Enter subtext">
+        <div id="subTextColors"></div>
+        <button id="addStatus">Add Status</button>
     </div>
-    
-    <div>
-        <span class="label" id="Main TextLabel">Main Text: white</span><br>
-        <input type="text" id="mainText" placeholder="Enter main text..."><br>
-        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Main Text', 'black')">Black</button>
-        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Main Text', 'white')">White</button>
-        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Main Text', 'red')">Red</button>
-        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Main Text', 'gray')">Gray</button>
-        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Main Text', 'blue')">Blue</button>
-        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Main Text', 'green')">Green</button>
-        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Main Text', 'purple')">Purple</button>
-    </div>
-    
-    <div>
-        <span class="label" id="SubtextLabel">Subtext: white</span><br>
-        <input type="text" id="subText" placeholder="Enter subtext..."><br>
-        <button class="color-button" style="background-color:black; color:white;" onclick="updateLabel('Subtext', 'black')">Black</button>
-        <button class="color-button" style="background-color:white; color:black;" onclick="updateLabel('Subtext', 'white')">White</button>
-        <button class="color-button" style="background-color:red; color:white;" onclick="updateLabel('Subtext', 'red')">Red</button>
-        <button class="color-button" style="background-color:gray; color:white;" onclick="updateLabel('Subtext', 'gray')">Gray</button>
-        <button class="color-button" style="background-color:blue; color:white;" onclick="updateLabel('Subtext', 'blue')">Blue</button>
-        <button class="color-button" style="background-color:green; color:white;" onclick="updateLabel('Subtext', 'green')">Green</button>
-        <button class="color-button" style="background-color:purple; color:white;" onclick="updateLabel('Subtext', 'purple')">Purple</button>
-    </div>
-    
-    <button onclick="resetForm()" style="margin-top: 20px; padding: 10px; font-size: 16px;">Add Status</button>
+    <div id="statusList"></div>
+    <script>
+        const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
+        let bgColor = "black", mainTextColor = "white", subTextColor = "white";
+
+        function createColorButtons(containerId, updateFunction, labelId) {
+            const container = document.getElementById(containerId);
+            colors.forEach(color => {
+                let btn = document.createElement("button");
+                btn.className = "color-button";
+                btn.style.backgroundColor = color;
+                btn.style.color = (color === "white") ? "black" : "white";
+                btn.textContent = color;
+                btn.onclick = () => {
+                    updateFunction(color);
+                    document.getElementById(labelId).textContent = color;
+                    if (color === "white") {
+                        document.getElementById(labelId).style.backgroundColor = "black";
+                        document.getElementById(labelId).style.color = "white";
+                    } else {
+                        document.getElementById(labelId).style.backgroundColor = "transparent";
+                        document.getElementById(labelId).style.color = "black";
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
+        createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
+        createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
+
+        document.getElementById("addStatus").addEventListener("click", () => {
+            const mainText = document.getElementById("mainTextInput").value.trim();
+            const subText = document.getElementById("subTextInput").value.trim();
+            if (!mainText) return;
+
+            const statusCard = document.createElement("div");
+            statusCard.className = "status-card";
+            statusCard.style.backgroundColor = bgColor;
+            statusCard.innerHTML = `<strong style="color: ${mainTextColor}">${mainText}</strong><br><span style="color: ${subTextColor}">${subText}</span>`;
+
+            document.getElementById("statusList").appendChild(statusCard);
+            
+            document.getElementById("mainTextInput").value = "";
+            document.getElementById("subTextInput").value = "";
+            bgColor = "black";
+            mainTextColor = "white";
+            subTextColor = "white";
+            document.getElementById("bgColorLabel").textContent = "black";
+            document.getElementById("mainTextColorLabel").textContent = "white";
+            document.getElementById("subTextColorLabel").textContent = "white";
+        });
+    </script>
 </body>
 </html>
