@@ -120,11 +120,27 @@
         bgColor = "black";
         mainTextColor = "white";
         subTextColor = "white";
-        document.getElementById("bgColorLabel").textContent = "black";
-        document.getElementById("mainTextColorLabel").textContent = "white";
-        document.getElementById("subTextColorLabel").textContent = "white";
+        
+        // Reset the color-word texts to the default colors (black for background, white for text)
+        const bgColorLabel = document.getElementById("bgColorLabel");
+        const mainTextColorLabel = document.getElementById("mainTextColorLabel");
+        const subTextColorLabel = document.getElementById("subTextColorLabel");
+
+        // Set labels to default
+        bgColorLabel.textContent = "black";
+        mainTextColorLabel.textContent = "white";
+        subTextColorLabel.textContent = "white";
+        
+        // Reset label styles to default
+        bgColorLabel.style.color = "black";
+        bgColorLabel.style.backgroundColor = "transparent";
+        
+        mainTextColorLabel.style.color = "white";
+        mainTextColorLabel.style.backgroundColor = "transparent";
+        
+        subTextColorLabel.style.color = "white";
+        subTextColorLabel.style.backgroundColor = "transparent";
     });
 </script>
-
 </body>
 </html>
