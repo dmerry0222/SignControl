@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Manager</title>
+    <title>Status Color Editor</title>
+ 
+
+
 <style>
     body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
     .color-button { padding: 10px; margin: 5px; border: none; cursor: pointer; }
@@ -18,6 +21,8 @@
     }
 </style>
 </head>
+
+
 <body>
     <h2>Status Manager</h2>
     <div class="controls">
@@ -32,115 +37,162 @@
         <button id="addStatus">Add Status</button>
     </div>
     <div id="statusList"></div>
-<script>
-    const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
-    let bgColor = "black", mainTextColor = "white", subTextColor = "white";
-    let statuses = [];
 
-    function createColorButtons(containerId, updateFunction, labelId) {
-        const container = document.getElementById(containerId);
-        colors.forEach(color => {
-            let btn = document.createElement("button");
-            btn.className = "color-button";
-            btn.style.backgroundColor = color;
-            btn.style.color = (color === "white") ? "black" : "white";
-            btn.textContent = color;
-            btn.onclick = () => {
-                updateFunction(color);
-                const label = document.getElementById(labelId);
-                label.textContent = color;
 
-                // Update the label text color to match the selected color, except for white
-                if (color === "white") {
-                    label.style.backgroundColor = "black";
-                    label.style.color = "white";
-                } else {
-                    label.style.backgroundColor = "transparent";
-                    label.style.color = color; // Set the label color to the selected color
-                }
-            };
-            container.appendChild(btn);
+
+
+
+    <script>
+        const colors = ["black", "white", "red", "gray", "blue", "green", "purple"];
+        let bgColor = "black", mainTextColor = "white", subTextColor = "white";
+        let statuses = [];
+
+
+
+
+        function createColorButtons(containerId, updateFunction, labelId) {
+            const container = document.getElementById(containerId);
+            colors.forEach(color => {
+                let btn = document.createElement("button");
+                btn.className = "color-button";
+                btn.style.backgroundColor = color;
+                btn.style.color = (color === "white") ? "black" : "white";
+                btn.textContent = color;
+                btn.onclick = () => {
+                    updateFunction(color);
+                    const label = document.getElementById(labelId);
+                    label.textContent = color;
+
+
+
+
+
+                    // Update the label text color to match the selected color, except for white
+                    if (color === "white") {
+                        label.style.backgroundColor = "black";
+                        label.style.color = "white";
+                    } else {
+                        label.style.backgroundColor = "transparent";
+                        label.style.color = color; // Set the label color to the selected color
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+
+
+
+
+        function deleteStatus(index) {
+            statuses.splice(index, 1);  // Remove the status from the array
+            renderStatuses();  // Re-render the updated list
+            saveStatuses(); // Save updated statuses to GitHub
+        }
+
+        function renderStatuses() {
+            const statusListDiv = document.getElementById('statusList');
+            statusListDiv.innerHTML = '';  // Clear existing statuses
+
+            statuses.forEach((status, index) => {
+                const statusCard = document.createElement("div");
+                statusCard.className = "status-card";
+                statusCard.style.backgroundColor = status.bgColor;
+                
+                // Add main text and subtext
+                statusCard.innerHTML = `<strong style="color: ${status.mainTextColor}">${status.mainText}</strong><br><span style="color: ${status.subTextColor}">${status.subText}</span>`;
+                
+                // Create the delete button
+                const deleteButton = document.createElement("span");
+                deleteButton.className = "delete";
+                deleteButton.innerText = "X";
+                deleteButton.onclick = () => deleteStatus(index);  // Attach delete function
+
+                statusCard.appendChild(deleteButton);
+                statusListDiv.appendChild(statusCard);
+            });
+        }
+
+        function saveStatuses() {
+            // Save statuses to GitHub
+            fetch('https://api.github.com/repos/dmerry0222/KioskJSONMemory/contents/status.json', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': '',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: 'Updated status list',
+                    committer: {
+                        name: 'dmerry0222',
+                        email: 'dave.l.merry@gmail.com',
+                    },
+                    content: btoa(JSON.stringify(statuses)),
+                }),
+            }).then(response => response.json())
+              .then(() => console.log("Statuses saved to GitHub"))
+              .catch(error => console.error('Error saving statuses:', error));
+        }
+
+        function loadStatuses() {
+            fetch('https://raw.githubusercontent.com/dmerry0222/KioskJSONMemory/main/status.json')
+                .then(response => response.json())
+                .then(data => {
+                    statuses = data;
+                    renderStatuses();
+                })
+                .catch(error => console.error('Error loading statuses:', error));
+        }
+
+        // Create color buttons
+        createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
+        createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
+        createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
+
+        // Add new status
+        document.getElementById("addStatus").addEventListener("click", () => {
+            const mainText = document.getElementById("mainTextInput").value.trim();
+            const subText = document.getElementById("subTextInput").value.trim();
+            if (!mainText) return;
+
+            // Add new status to the array
+            statuses.push({
+                mainText,
+                subText,
+                bgColor,
+                mainTextColor,
+                subTextColor
+            });
+
+            // Render the updated list of statuses
+            renderStatuses();
+
+            // Save updated statuses to GitHub
+            saveStatuses();
+
+            // Reset input fields and colors
+            document.getElementById("mainTextInput").value = "";
+            document.getElementById("subTextInput").value = "";
+            bgColor = "black";
+            mainTextColor = "white";
+            subTextColor = "white";
         });
-    }
 
-    function deleteStatus(index) {
-        statuses.splice(index, 1);  // Remove the status from the array
-        renderStatuses();  // Re-render the updated list
-    }
+        // Page load initialization
+        window.onload = () => {
+            const mainTextColorLabel = document.getElementById("mainTextColorLabel");
+            const subTextColorLabel = document.getElementById("subTextColorLabel");
 
-    function renderStatuses() {
-        const statusListDiv = document.getElementById('statusList');
-        statusListDiv.innerHTML = '';  // Clear existing statuses
-
-        statuses.forEach((status, index) => {
-            const statusCard = document.createElement("div");
-            statusCard.className = "status-card";
-            statusCard.style.backgroundColor = status.bgColor;
+            // Ensure "white" has black background and white text on page load
+            mainTextColorLabel.style.color = "white";
+            mainTextColorLabel.style.backgroundColor = "black";
             
-            // Add main text and subtext
-            statusCard.innerHTML = `<strong style="color: ${status.mainTextColor}">${status.mainText}</strong><br><span style="color: ${status.subTextColor}">${status.subText}</span>`;
-            
-            // Create the delete button
-            const deleteButton = document.createElement("span");
-            deleteButton.className = "delete";
-            deleteButton.innerText = "X";
-            deleteButton.onclick = () => deleteStatus(index);  // Attach delete function
+            subTextColorLabel.style.color = "white";
+            subTextColorLabel.style.backgroundColor = "black";
 
-            statusCard.appendChild(deleteButton);
-            statusListDiv.appendChild(statusCard);
-        });
-    }
-
-    // Create color buttons
-    createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
-    createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
-    createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
-
-    // Add new status
-    document.getElementById("addStatus").addEventListener("click", () => {
-        const mainText = document.getElementById("mainTextInput").value.trim();
-        const subText = document.getElementById("subTextInput").value.trim();
-        if (!mainText) return;
-
-        // Add new status to the array
-        statuses.push({
-            mainText,
-            subText,
-            bgColor,
-            mainTextColor,
-            subTextColor
-        });
-
-        // Render the updated list of statuses
-        renderStatuses();
-        
-        // Reset input fields and colors
-        document.getElementById("mainTextInput").value = "";
-        document.getElementById("subTextInput").value = "";
-        bgColor = "black";
-        mainTextColor = "white";
-        subTextColor = "white";
-        
-        // Reset the color-word texts to the default colors (black for background, white for text)
-        const bgColorLabel = document.getElementById("bgColorLabel");
-        const mainTextColorLabel = document.getElementById("mainTextColorLabel");
-        const subTextColorLabel = document.getElementById("subTextColorLabel");
-
-        // Set labels to default
-        bgColorLabel.textContent = "black";
-        mainTextColorLabel.textContent = "white";
-        subTextColorLabel.textContent = "white";
-        
-        // Reset label styles to default
-        bgColorLabel.style.color = "black";
-        bgColorLabel.style.backgroundColor = "transparent";
-        
-        mainTextColorLabel.style.color = "white";
-        mainTextColorLabel.style.backgroundColor = "transparent";
-        
-        subTextColorLabel.style.color = "white";
-        subTextColorLabel.style.backgroundColor = "transparent";
-    });
-</script>
+            // Load statuses from GitHub
+            loadStatuses();
+        }
+    </script>
 </body>
 </html>
