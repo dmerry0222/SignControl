@@ -70,112 +70,119 @@
         });
     }
 
-    function deleteStatus(index) {
-        statuses.splice(index, 1);  // Remove the status from the array
-        renderStatuses();  // Re-render the updated list
-        saveStatuses(); // Save updated statuses to GitHub
-    }
+  function deleteStatus(index) {
+    statuses.splice(index, 1);  // Remove the status from the array
+    renderStatuses();  // Re-render the updated list
+    saveStatuses(); // Save updated statuses to GitHub
+}
 
-    function renderStatuses() {
-        const statusListDiv = document.getElementById('statusList');
-        statusListDiv.innerHTML = '';  // Clear existing statuses
+function renderStatuses() {
+    const statusListDiv = document.getElementById('statusList');
+    statusListDiv.innerHTML = '';  // Clear existing statuses
 
-        statuses.forEach((status, index) => {
-            const statusCard = document.createElement("div");
-            statusCard.className = "status-card";
-            statusCard.style.backgroundColor = status.bgColor;
+    statuses.forEach((status, index) => {
+        const statusCard = document.createElement("div");
+        statusCard.className = "status-card";
+        statusCard.style.backgroundColor = status.bgColor;
 
-            // Add main text and subtext
-            statusCard.innerHTML = `<strong style="color: ${status.mainTextColor}">${status.mainText}</strong><br><span style="color: ${status.subTextColor}">${status.subText}</span>`;
+        // Add main text and subtext
+        statusCard.innerHTML = `<strong style="color: ${status.mainTextColor}">${status.mainText}</strong><br><span style="color: ${status.subTextColor}">${status.subText}</span>`;
 
-            // Create the delete button
-            const deleteButton = document.createElement("span");
-            deleteButton.className = "delete";
-            deleteButton.innerText = "X";
-            deleteButton.onclick = () => deleteStatus(index);  // Attach delete function
+        // Create the delete button
+        const deleteButton = document.createElement("span");
+        deleteButton.className = "delete";
+        deleteButton.innerText = "X";
+        deleteButton.onclick = () => deleteStatus(index);  // Attach delete function
 
-            statusCard.appendChild(deleteButton);
-            statusListDiv.appendChild(statusCard);
-        });
-    }
+        statusCard.appendChild(deleteButton);
+        statusListDiv.appendChild(statusCard);
+    });
+}
 
-    function saveStatuses() {
-        // Instead of saving directly to GitHub, send status data to your server
-        fetch('https://yourserver.com/trigger-github-action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+function saveStatuses() {
+    // Instead of saving directly to GitHub, trigger GitHub Action via repository_dispatch API
+    fetch('https://api.github.com/repos/dmerry0222/KioskJSONMemory/dispatches', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GH_TOKEN}`, // Make sure GH_TOKEN is set in GitHub Secrets
+        },
+        body: JSON.stringify({
+            event_type: 'update_status', // Custom event type to trigger GitHub Action
+            client_payload: {
+                statuses: statuses, // Send the updated statuses to GitHub Action
             },
-            body: JSON.stringify({
-                statuses: statuses, // Send the updated statuses to the server
-            }),
         })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("GitHub Action triggered:", data);
+    })
+    .catch(error => {
+        console.error('Error triggering GitHub Action:', error);
+    });
+}
+
+function loadStatuses() {
+    fetch('https://raw.githubusercontent.com/dmerry0222/KioskJSONMemory/main/status.json')
         .then(response => response.json())
         .then(data => {
-            console.log("Status update triggered:", data);
+            statuses = data;
+            renderStatuses();
         })
-        .catch(error => console.error('Error triggering GitHub Action:', error));
-    }
+        .catch(error => console.error('Error loading statuses:', error));
+}
 
-    function loadStatuses() {
-        fetch('https://raw.githubusercontent.com/dmerry0222/KioskJSONMemory/main/status.json')
-            .then(response => response.json())
-            .then(data => {
-                statuses = data;
-                renderStatuses();
-            })
-            .catch(error => console.error('Error loading statuses:', error));
-    }
+// Create color buttons
+createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
+createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
+createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
 
-    // Create color buttons
-    createColorButtons("bgColors", color => bgColor = color, "bgColorLabel");
-    createColorButtons("mainTextColors", color => mainTextColor = color, "mainTextColorLabel");
-    createColorButtons("subTextColors", color => subTextColor = color, "subTextColorLabel");
+// Add new status
+document.getElementById("addStatus").addEventListener("click", () => {
+    const mainText = document.getElementById("mainTextInput").value.trim();
+    const subText = document.getElementById("subTextInput").value.trim();
+    if (!mainText) return;
 
-    // Add new status
-    document.getElementById("addStatus").addEventListener("click", () => {
-        const mainText = document.getElementById("mainTextInput").value.trim();
-        const subText = document.getElementById("subTextInput").value.trim();
-        if (!mainText) return;
-
-        // Add new status to the array
-        statuses.push({
-            mainText,
-            subText,
-            bgColor,
-            mainTextColor,
-            subTextColor
-        });
-
-        // Render the updated list of statuses
-        renderStatuses();
-
-        // Save updated statuses to GitHub
-        saveStatuses();
-
-        // Reset input fields and colors
-        document.getElementById("mainTextInput").value = "";
-        document.getElementById("subTextInput").value = "";
-        bgColor = "black";
-        mainTextColor = "white";
-        subTextColor = "white";
+    // Add new status to the array
+    statuses.push({
+        mainText,
+        subText,
+        bgColor,
+        mainTextColor,
+        subTextColor
     });
 
-    // Page load initialization
-    window.onload = () => {
-        const mainTextColorLabel = document.getElementById("mainTextColorLabel");
-        const subTextColorLabel = document.getElementById("subTextColorLabel");
+    // Render the updated list of statuses
+    renderStatuses();
 
-        // Ensure "white" has black background and white text on page load
-        mainTextColorLabel.style.color = "white";
-        mainTextColorLabel.style.backgroundColor = "black";
+    // Save updated statuses to GitHub
+    saveStatuses();
 
-        subTextColorLabel.style.color = "white";
-        subTextColorLabel.style.backgroundColor = "black";
+    // Reset input fields and colors
+    document.getElementById("mainTextInput").value = "";
+    document.getElementById("subTextInput").value = "";
+    bgColor = "black";
+    mainTextColor = "white";
+    subTextColor = "white";
+});
 
-        // Load statuses from GitHub
-        loadStatuses();
-    }
+// Page load initialization
+window.onload = () => {
+    const mainTextColorLabel = document.getElementById("mainTextColorLabel");
+    const subTextColorLabel = document.getElementById("subTextColorLabel");
+
+    // Ensure "white" has black background and white text on page load
+    mainTextColorLabel.style.color = "white";
+    mainTextColorLabel.style.backgroundColor = "black";
+
+    subTextColorLabel.style.color = "white";
+    subTextColorLabel.style.backgroundColor = "black";
+
+    // Load statuses from GitHub
+    loadStatuses();
+}
+
 </script>
 
 
